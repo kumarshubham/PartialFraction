@@ -2,6 +2,7 @@ __author__ = 'kumar'
 
 import random
 from fractions import Fraction
+import math
 
 
 # initiates the question generation steps and return a dictionary of questions, answers and other details
@@ -26,25 +27,34 @@ def generateQuestions(Ntype=1, Dtype=1, Mtype=1):
 
     K = setRandomNum(Ntype)
     D = setRandomDenom(Mtype)
+    loop = True
 
-    if Mtype == 1 or Mtype == 2:
-        while D[1] == D[3] and D[3] == D[5]:
-            D = setRandomDenom(Mtype)
-        while D[2] == D[1] and D[1] == 0:
-            D = setRandomDenom(Mtype)
-        while D[2] == D[3] and D[2] == 0:
-            D = setRandomDenom(Mtype)
-        while D[3] == D[1] and D[3] == 0:
-            D = setRandomDenom(Mtype)
-    elif Mtype == 3:
-        Quad = [D[2], D[3], D[4]]
-        while checkRootType(Quad):
-            D = setRandomDenom(Mtype)
-            Quad = [D[2], D[3], D[4]]
-            # print Quad,checkRootType(Quad)
-        # print D,Mtype
-    while K[0] == K[1] and K[1] == K[2]:
+    while loop:
         K = setRandomNum(Ntype)
+        D = setRandomDenom(Mtype)
+        if Mtype == 2:
+            if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
+                    (D[3] == D[1] and D[3] == 0):
+                continue
+                # D = setRandomDenom(Mtype)
+        if Mtype == 1:
+                if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
+                        (D[3] == D[1] and D[3] == 0) or (D[1] == D[3] or D[3] == D[5] or D[5] == D[1]):
+                    continue
+                    # D = setRandomDenom(Mtype)
+        elif Mtype == 3:
+            Quad = [D[2], D[3], D[4]]
+            if checkRootType(Quad):
+                continue
+                # D = setRandomDenom(Mtype)
+                # Quad = [D[2], D[3], D[4]]
+                # print Quad,checkRootType(Quad)
+            # print D,Mtype
+        if (K[0] == K[1] and K[1] == K[2]) or checkCommonFactor(K,D,["eq", "fac"]):
+            print checkCommonFactor(K,D,["eq","fac"]), K,D
+            continue
+            # K = setRandomNum(Ntype)
+        loop = False
 
     Ques = solvePartialFraction(D, K, Dtype, Mtype)
     return Ques
@@ -293,31 +303,95 @@ def checkEqual(items):
 
 
 # take a list of correct answers(A,B,C) and create 4 options
-def getOptions(ans, correct=0):
+def getOptions(ans, correct=0, Dtype=0):
     option = []
     temp = random.sample(range(3), 3)
-    option.append(str(ans[0]))
-    option.append(str(ans[1]))
-    option.append(str(ans[2]))
-    temp1 = ans[temp[0]]
-    temp2 = temp1.find('-')
-    if temp1 != '0' and temp1 != '0':
-        if temp2 == -1:
-            temp1 = '-' + temp1
+    list1 = ans
+    list2 = [ans[0], ans[1], ans[2], MultiplyMinus(ans[0]), MultiplyMinus(ans[1]), MultiplyMinus(ans[2])]
+    temp1 = random.sample(range(3), 3)
+    temp2 = random.sample(range(3), 3)
+    temp3 = random.sample(range(3), 3)
+    if correct <= 2:
+        option.append(str(ans[0]))
+        option.append(str(ans[1]))
+        option.append(str(ans[2]))
+        temp1 = ans[temp[0]]
+        temp2 = temp1.find('-')
+        if temp1 != '0' and temp1 != '0':
+            if temp2 == -1:
+                temp1 = '-' + temp1
+            else:
+                temp1 = temp1.replace('-', '')
+            option.append(temp1)
         else:
-            temp1 = temp1.replace('-', '')
-        option.append(temp1)
-    else:
-        option.append(str(random.randint(-50, 50)))
-    index = checkEqual(option)
-    while index[0] != -1:
-        for x in index:
-            if x != correct:
-                option[x] = str(random.randint(-50, 50))
+            option.append(str(random.randint(-50, 50)))
         index = checkEqual(option)
+        while index[0] != -1:
+            for x in index:
+                if x != correct:
+                    option[x] = str(random.randint(-50, 50))
+            index = checkEqual(option)
+    elif correct != 6 and Dtype == 1:
+        tempAns1 = ans[0] + ", " + ans[1]
+        tempAns2 = ans[1] + ", " + ans[2]
+        tempAns3 = ans[0] + ", " + ans[2]
+        tempAns4 = ans[temp[0]] + ", " + MultiplyMinus(ans[temp[1]])
+        option.append(tempAns1)
+        option.append(tempAns2)
+        option.append(tempAns3)
+        option.append(tempAns4)
+        index = checkEqual(option)
+        while index[0] != -1:
+            for x in index:
+                if (x + 3) != correct:
+                    option[x] = str(random.randint(-50, 50)) + ", " + str(random.randint(-50, 50))
+                index = checkEqual(option)
+    elif correct != 6 and Dtype != 1:
+        tempAns1 = ans[temp[0]] + ", " + ans[temp[1]]
+        tempAns2 = ans[temp1[0]] + ", " + GetNewIfEqual(list1, MultiplyMinus(ans[temp1[1]]))
+        tempAns3 = ans[temp2[0]] + ", " + GetNewIfEqual(list1)
+        tempAns4 = GetNewIfEqual(list1, MultiplyMinus(ans[temp3[0]])) + ", " + GetNewIfEqual(list1, MultiplyMinus(ans[temp3[1]]))
+        option.append(tempAns1)
+        option.append(tempAns2)
+        option.append(tempAns3)
+        option.append(tempAns4)
+    else:
+        tempAns1 = ans[0] + ", " + ans[1] + ", " + ans[2]
+        tempAns2 = ans[temp[0]] + ", " + ans[temp[1]] + ", " + GetNewIfEqual(list1, MultiplyMinus(ans[temp[2]]))
+        tempAns3 = ans[temp1[0]] + ", " + ans[temp1[1]] + ", " + GetNewIfEqual(list2)
+        tempAns4 = ans[temp2[0]] + ", " + GetNewIfEqual(list2) + ", " + GetNewIfEqual(list2)
+        option.append(tempAns1)
+        option.append(tempAns2)
+        option.append(tempAns3)
+        option.append(tempAns4)
+
     option = random.sample(option, 4)
     # print option
     return option
+
+
+def GetNewIfEqual(list, num=str(random.randint(-50, 50))):
+    match = True
+    while match:
+        match = False
+        for item in list:
+            if num == item:
+                num = str(random.randint(-50, 50))
+                match = True
+    return num
+
+
+
+# take a string of a number and multiply it with minus sign
+def MultiplyMinus(num):
+    temp1 = num
+    temp2 = temp1.find('-')
+    if temp1 != '0':
+        if temp2 == -1:
+            temp1 = "-" + temp1
+        else:
+            temp1 = temp1.replace('-','')
+    return temp1
 
 
 # convert a float number to a rational number and returns it as a string
@@ -368,3 +442,82 @@ def checkRootType(Quad):
         return False
     else:
         return True
+
+
+# Returns RHS equation after eliminating denominators from both side.. i.e. lhs = A(quad) + B(quad) + c(quad)
+def getRHS(q):
+    rhs = ""
+    if q['Dtype'] == 1 or q['Dtype'] == 2 or q['Dtype'] == 3:
+        rhs = "A(x" + getSignedString(q['Denom'][3]) + ")(x" + getSignedString(q['Denom'][5]) + ") + B(x" + \
+              getSignedString(q['Denom'][1]) + ")(x" + getSignedString(q['Denom'][5]) + ") + C(x" + \
+              getSignedString(q['Denom'][1]) + ")"
+        if q['Mtype'] == 1:
+            rhs += "(x" + getSignedString(q['Denom'][3]) + ")"
+    return rhs
+
+
+## this function checks for any common factor among two equation
+## equation can be in any of the two formats i.e. either in ax2+bx+c or (x+a)(x+b)(x+c)
+## first type is denoted by 'eq' and second type is denoted by 'fac'
+def checkCommonFactor(eq1, eq2, typeList):
+    if typeList[0] == "eq":
+        a = eq1[0]
+        b = eq1[1]
+        c = eq1[2]
+        if a == 0 and b == 0 and c == 0:
+            return True
+        d = b ** 2 - 4 * a * c
+        if d < 0:
+            return False
+        elif a != 0:
+            if d == 0:
+                x = (-b)/2 * a
+                eq1 = [1, x, 1, x]
+            else:
+                x1 = (-b+math.sqrt(d))/(2 * a)
+                x2 = (-b-math.sqrt(d))/(2 * a)
+                eq1 = [1, x1, 1, x2]
+        elif b != 0:
+            x = -(c/b)
+            eq1 = [1, x]
+        else:
+            return False
+        typeList[0] = "fac"
+
+    # if typeList[1] == "eq":
+    #     a = eq1[0]
+    #     b = eq1[1]
+    #     c = eq1[2]
+    #
+    #     d = b ** 2 - 4 * a * c
+    #     if d < 0:
+    #         return False
+    #     elif a != 0:
+    #         if d == 0:
+    #             x = (-b)/2 * a
+    #             eq2 = [1, x, 1, x]
+    #         else:
+    #             x1 = (-b+math.sqrt(d))/(2 * a)
+    #             x2 = (-b-math.sqrt(d))/(2 * a)
+    #             eq2 = [1, x1, 1, x2]
+    #     elif b != 0:
+    #         x = -(c/b)
+    #         eq2 = [1, x]
+    #     else:
+    #         return False
+    #     typeList[1] = "fac"
+
+    if typeList[0] == "fac" and typeList[1] == "fac":
+        len1 = len(eq1)
+        len2 = len(eq2)
+        if len1 > len2:
+            eq3 = eq2
+            eq4 = eq1
+        else:
+            eq3 = eq1
+            eq4 = eq2
+        for x in range(min(len1/2,len2/2)):
+            for y in range(max(len1/2, len2/2)):
+                if eq1[2*x +1] == eq2[2*y +1]:
+                    return True
+    return False

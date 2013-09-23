@@ -32,7 +32,8 @@ def main():  # beginning of the code
     # Qtype = 1
     Ques = []
     Dtype = 1
-    for types in range(3):
+    Otype = 1  # 1 for one option, 2 for two options and 3 for all options
+    for types in range(2):
         Mtype = types + 1
         for num in range(7):
             Qtype = num + 1
@@ -57,9 +58,9 @@ def main():  # beginning of the code
     # 	Ques.append(generateQuestions(Qtype,Dtype))
     # print Ques
 
-    #generateHTML(Ques)
-    #generateCSV(Ques)
-    generateImages(Ques)
+    generateHTML(Ques)
+    generateCSV(Ques)
+    #generateImages(Ques)
 
 
 def getNumTypeDetail():
