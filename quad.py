@@ -37,10 +37,10 @@ def main():  # beginning of the code
     Otype = 1  # 1 for one option, 2 for two options and 3 for all options
     Mtype = 1
     total = 0
-    MtypeList = [3]
-    subList = [2, 3, 5]
-    DtypeList = [1, 2, 3]
-    askList = [1, 1, 1]
+    MtypeList = [4]  # Defines Main Type
+    subList = [2, 2, 2, 3, 3, 3]    # Defines number of question for corresponding Dtype and askList
+    DtypeList = [1, 2, 2, 1, 2, 2]  # Defines Denominator Type
+    askList = [3, 4, 5, 1, 1, 1]    # Defines whether asking for A or B or C or A and B or so on
 
     ### Use it for Mix Bag only
     # for q in MtypeList:
@@ -75,26 +75,28 @@ def main():  # beginning of the code
     #             Ques.append(temp)
 
     ### Use it for normal combinations
-    # count = 1
-    # for q in MtypeList:
-    #     Mtype = q
-    #     for r in range(len(subList)):
-    #         Dtype = DtypeList[r]
-    #         ask = askList[r]
-    #         ask1 = askList[r]
-    #         for s in range(subList[r]):
-    #             if Dtype != 1:
-    #                 if ask1 == 3 or ask1 == 4 or ask1 == 5:
-    #                     ask = random.randint(3, 5)
-    #             Qtype = random.randint(1, 7)
-    #             temp = generateQuestions(Mtype, Dtype, Qtype, count)
-    #             temp['ask'] = ask
-    #             Ques.append(temp)
-    #             count += 1
+    count = 1
+    for q in MtypeList:
+         Mtype = q
+         for r in range(len(subList)):
+             Dtype = DtypeList[r]
+             ask = askList[r]
+             ask1 = askList[r]
+             for s in range(subList[r]):
+                 if Dtype != 1:
+                     if ask1 == 3 or ask1 == 4 or ask1 == 5:
+                         ask = random.randint(3, 5)
+                 if Mtype == 3 and Dtype == 1:
+                     continue
+                 Qtype = random.randint(1, 7)
+                 temp = generateQuestions(Mtype, Dtype, Qtype, count)
+                 temp['ask'] = ask
+                 Ques.append(temp)
+                 count += 1
 
-    generateHTML(Ques)
-    generateCSV(Ques)    # Use this for type 1, 2 and 3
-    #generateCSV1(Ques)  ## Use this for type 4
+    #generateHTML(Ques)
+    #generateCSV2(Ques)    # Use this for type 1, 2 and 3 with LaTex
+    generateCSV3(Ques)     # Use this for type 4 with LaTex
     #generateImages(Ques)
 
 

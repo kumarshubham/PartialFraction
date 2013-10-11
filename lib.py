@@ -186,7 +186,7 @@ def solvePartialFraction(D, K, Dtype=0, Mtype=0):
                 a = getvalue(A1, v)
                 b = getvalue(B1, v)
                 c = getvalue(C1, v)
-                print D[1], D[3], v, b
+                #print D[1], D[3], v, b
                 rhsB = (lhs - a * rhsA - c * rhsC) / b
 
     ans = [rhsA, rhsB, rhsC]
@@ -457,7 +457,10 @@ def getAnsString(ans):
     elif denom == 1:
         str1 = str(num)
     else:
-        str1 = str(num) + "<span>/</span>" + str(denom)
+        if "-" in str(num):
+            str1 = "-\\frac{" + str(-num) + "}{" + str(denom) + "}"
+        else:
+            str1 = "\\frac{" + str(num) + "}{" + str(denom) + "}"
     return str1
 
 
@@ -508,18 +511,18 @@ def getRHS(q):
             rhs += "(x" + getSignedString(q['Denom'][3]) + ")"
     else:
         local = "("
-        if q['E'][0] != 0:
-            local += GetCoeffString(q['E'][0])
-            local += "x<sup>2</sup>"
-            if q['E'][1] > 0:
+        if q['Denom'][2] != 0:
+            local += GetCoeffString(q['Denom'][2])
+            local += "x^2"
+            if q['Denom'][3] > 0:
                 local += "+"
-        if q['E'][1] != 0:
-            local += GetCoeffString(q['E'][1])
+        if q['Denom'][3] != 0:
+            local += GetCoeffString(q['Denom'][3])
             local += "x"
-        if q['E'][2] > 0:
+        if q['Denom'][4] > 0:
             local += "+"
-        if q['E'][2] != 0:
-            local += str(q['E'][2])
+        if q['Denom'][4] != 0:
+            local += str(q['Denom'][4])
         local += ")"
         rhs = "A" + local + " + Bx(x" + getSignedString(q['Denom'][1]) + ") + C(x" + getSignedString(q['Denom'][1]) + ")"
     return rhs
