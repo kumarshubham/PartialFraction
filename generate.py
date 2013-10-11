@@ -207,7 +207,8 @@ def generateCSV(ques):
         html = ""
         hint1 = ""
         hint2 = ""
-        ask = random.randint(0, 6)  # 0 for A, 1 for B, 2 for C, 3 for (A,B), 4 for (B,C), 5 for (A,C), 6 for (A,B,C)
+        # ask = random.randint(0, 6)  # 0 for A, 1 for B, 2 for C, 3 for (A,B), 4 for (B,C), 5 for (A,C), 6 for (A,B,C)
+        ask = q['ask']
         local = " "
         numEq = ""
         ## co stands for correct option i.e. option asked in the question(A or B or C)
@@ -252,6 +253,9 @@ def generateCSV(ques):
             rootIndex1 = 1
             rootIndex2 = 3
             rootIndex3 = 5
+        if q['Mtype'] == 2 and "B" in co:
+            rootIndex1 = 1
+            rootIndex2 = 5
 
         if q['Dtype'] == 2 or q['Dtype'] == 3:
             html += "<span style='float:left;'>If </span><table style='float: left;position: relative; bottom: 31px; " \
@@ -306,36 +310,60 @@ def generateCSV(ques):
             if q['Denom'][1] != 0:
                 html += str(q['Denom'][1])
             html += ")"
-            html += "("
-            if q['Denom'][2] != 0:
-                if q['Denom'][2] > 1:
-                    html = html + str(q['Denom'][2]) + "x"
-                else:
-                    html += "x"
-                if q['Denom'][3] > 0:
-                    html += "+"
-            if q['Denom'][3] != 0:
-                html += str(q['Denom'][3])
-            html += ")"
-            html += "("
-            if q['Denom'][4] != 0:
-                if q['Denom'][4] > 1:
-                    html = html + str(q['Denom'][4]) + "x"
-                else:
-                    html += "x"
-                if q['Denom'][5] > 0:
-                    html += "+"
-            if q['Denom'][5] != 0:
-                html += str(q['Denom'][5])
-            html += ")"
+
+            if q['Mtype'] == 3:
+                local = "("
+                if q['E'][0] != 0:
+                    local = local + GetCoeffString(q['E'][0])
+                    local += "x<sup>2</sup>"
+                    if q['E'][1] > 0:
+                        local += "+"
+                if q['E'][1] != 0:
+                    local = local + GetCoeffString(q['E'][1])
+                    local += "x"
+                if q['E'][2] > 0:
+                    local += "+"
+                if q['E'][2] != 0:
+                    local += str(q['E'][2])
+                local += ")"
+                html += local
+            else:
+                html += "("
+                if q['Denom'][2] != 0:
+                    if q['Denom'][2] > 1:
+                        html = html + str(q['Denom'][2]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][3] > 0:
+                        html += "+"
+                if q['Denom'][3] != 0:
+                    html += str(q['Denom'][3])
+                html += ")"
+                html += "("
+                if q['Denom'][4] != 0:
+                    if q['Denom'][4] > 1:
+                        html = html + str(q['Denom'][4]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][5] > 0:
+                        html += "+"
+                if q['Denom'][5] != 0:
+                    html += str(q['Denom'][5])
+                html += ")"
             html += "</span></span></td></tr></tbody></table></span>"
             html = html + "<span style='position: relative;top: 12px;'> = </span><span style='margin-left:20px;'> " \
                           "A<span style='border-top: 1px solid;position: relative;top: 29px;margin-left: -25px;'>(x" + \
-                          getSignedString(q['Denom'][1]) + ")</span> + B<span style='border-top: 1px solid;position: " \
-                          "relative;top: 29px;margin-left: -25px;'>(x" + \
-                          getSignedString(q['Denom'][3]) + ")</span> + C<span style='border-top: 1px solid;position: " \
-                          "relative;top: 29px;margin-left: -25px;'>(x" + \
-                          getSignedString(q['Denom'][5]) + ")"
+                          getSignedString(q['Denom'][1]) + ")</span> + "
+
+            if q['Mtype'] == 3:
+                html += "<span style='margin-left:35px'>Bx+C</span><span style='border-top: 1px solid;position: " \
+                        "relative;top: 29px;margin-left: -100px;'>" + local
+
+            else:
+                html += "B<span style='border-top: 1px solid;position: relative;top: 29px;margin-left: -25px;'>(x" + \
+                        getSignedString(q['Denom'][3]) + ")</span> + C<span style='border-top: 1px solid;position: " \
+                        "relative;top: 29px;margin-left: -25px;'>(x" + getSignedString(q['Denom'][5]) + ")"
+
             if q['Mtype'] == 2:
                 html += "<sup>2</sup>"
             html += "</span></span>"
@@ -392,7 +420,7 @@ def generateCSV(ques):
                 tempStr2 = "one of the terms in its partial fractions is"
                 tempStr3 = "then find the value of " + co
             else:
-                if ask ==6:
+                if ask == 6:
                     tempWord = " all"
                 else:
                     tempWord = ""
@@ -403,7 +431,7 @@ def generateCSV(ques):
 
             html += tempStr1 + " <br/><p style='position: relative;margin-top: 80px;bottom: 40px;'>" + tempStr2 + \
                 "<span  style='position: relative;bottom: 12px;" \
-                "margin-right: 10px;'><span style='margin-left:20px;'> "
+                "margin-right: 10px;'><span style='margin-left:35px;'> "
 
             if ask <= 2:
                 if q['Mtype'] == 1 or q['Mtype'] == 2 or (q['Mtype'] == 3 and ask == 0):
@@ -414,7 +442,7 @@ def generateCSV(ques):
                     html += "</span></span>"
                 elif q['Mtype'] == 3 and ask != 0:
                     html = html + "(Bx+C)</span><span style='border-top: 1px solid;position: relative;top: 29px;" \
-                                  "margin-left: -75px;'>" + local + "</span></span>"
+                                  "margin-left: -100px;'>" + local + "</span></span>"
             else:
                 html += "</span></span>"
             html += "<span>" + tempStr3 + "</span></p>"
@@ -445,7 +473,7 @@ def generateCSV(ques):
                 tempStr2 = "one of the terms in its partial fractions is"
                 tempStr3 = "then find the value of " + co
             else:
-                if ask ==6:
+                if ask == 6:
                     tempWord = " all"
                 else:
                     tempWord = ""
@@ -469,7 +497,7 @@ def generateCSV(ques):
                 elif q['Mtype'] == 3 and ask != 0:
                     local = "("
                     if q['Denom'][2] != 0:
-                        local = local + GetCoeffString(q['Demon'][2])
+                        local = local + GetCoeffString(q['Denom'][2])
                         local += "x<sup>2</sup>"
                         if q['Denom'][3] > 0:
                             local += "+"
@@ -517,13 +545,13 @@ def generateCSV(ques):
         option3 = option[2]
         option4 = option[3]
         index = 0
-        correct = 0
+        correct = 4
         feedback = []
         feedback1 = "Your answer is correct! Let\'s try the next one"
         feedback2 = "The selected answer is the value of "
-        feedback3 = "You've got one of the coefficients correct i.e. the value of "
+        feedback3 = "You've got one of the coefficients correct i.e. VALUE OF "
         feedback4 = " but the second coefficient is incorrect. Let's try the next one"
-        feedback5 = "You've got two of the coefficients correct i.e. the value of "
+        feedback5 = "You've got two of the coefficients correct i.e.  VALUES OF "
         feedback6 = " but the other two coefficients are incorrect. Let's try the next one"
         feedback7 = " but the third coefficient is incorrect. Let's try the next one"
         for x in option:
@@ -531,37 +559,34 @@ def generateCSV(ques):
             find1 = x.find(str1)
             find2 = x.find(str2)
             find3 = x.find(str3)
+            find4 = x.find("-" + str1)
+            find5 = x.find("-" + str2)
+            find6 = x.find("-" + str3)
             ans1 = None
             ansCount = 0
             if ask != 6:
-                if find1 != -1:
+                if find1 != -1 and find4 == -1 and (ask == 0 or ask == 3 or ask == 5 or q['Dtype'] != 1):
                     ans1 = "A"
-                elif find2 != -1:
+                elif find2 != -1 and find5 == --1 and (ask == 1 or ask == 3 or ask == 4 or q['Dtype'] != 1):
                     ans1 = "B"
-                elif find3 != -1:
+                elif find3 != -1 and find6 == -1 and (ask == 2 or ask == 3 or ask == 5 or q['Dtype'] != 1):
                     ans1 = "C"
             else:
-                if find1 != -1:
-                    find4 = x.find("-" + str1)
-                    if find4 == -1:
-                        ans1 = "A"
-                        ansCount += 1
-                if find2 != -1:
-                    find4 = x.find("-" + str2)
-                    if find4 == -1:
-                        if ansCount > 0:
-                            ans1 += " and B"
-                        else:
-                            ans1 = "B"
-                        ansCount += 1
-                if find3 != -1:
-                    find4 = x.find("-" + str3)
-                    if find4 == -1:
-                        if ansCount > 0:
-                            ans1 += " and C"
-                        else:
-                            ans1 = "C"
-                        ansCount += 1
+                if find1 != -1 and find4 == -1:
+                    ans1 = "A"
+                    ansCount += 1
+                if find2 != -1 and find5 == -1:
+                    if ansCount > 0:
+                        ans1 += " and B"
+                    else:
+                        ans1 = "B"
+                    ansCount += 1
+                if find3 != -1 and find6 == -1:
+                    if ansCount > 0:
+                        ans1 += " and C"
+                    else:
+                        ans1 = "C"
+                    ansCount += 1
 
 
             if x == str1:
@@ -638,7 +663,7 @@ def generateCSV(ques):
                 #     feedback.append(feedback2 + "A,B and C and not " + co + ". Let's try the next one")
                 print "Inside A,B,C", ask
 
-            elif ans1:
+            elif ans1 and (ask == 3 or ask == 4 or ask == 5 or ask == 6):
                 if ask != 6:
                     feedback.append(feedback3 + ans1 + feedback4)
                 else:
@@ -648,38 +673,51 @@ def generateCSV(ques):
                         feedback.append(feedback5 + ans1 + feedback7)
                 print "Inside ans1", ask, ans1
             else:
+                if q['Mtype'] == 1 and (ask == 3 or ask == 4 or ask == 5):
+                    feedback.append("Unfortunately both the coefficients in the selected answer are incorrect. "
+                                    "Let's try the next one")
                 feedback.append("Unfortunately the selected answer is not a co-efficient of any of the partial"
                                 " fractions. Let's try the next one")
                 print "Inside Else", ask
         print option
         print feedback
-        root1 = str(q['Denom'][rootIndex1])
+        root1 = MultiplyMinus(str(q['Denom'][rootIndex1]))
         topic = 7  # "topic_id"
         difficulty = q['Dtype']
-        hintText1 = "Rearrange the equation in the form " + numEq + " = " + getRHS(q)
-        hintText2 = "Substitute the value of x such that terms " + nA1 + " and " + nA2 + " are removed from the equation"
-        hintText3 = "Based on the above hint , you need to substitute the value of x = " + root1 + " to get the value of " + co[0]
-        hintText4 = "Ensure that the denominator of the expression is factorized  and reduced  to factors of " \
+        hintText1 = "Rearrange the equation in the form<br/> " + numEq + " = " + getRHS(q)
+        hintText2 = "Substitute the values of x such that terms " + nA1 + " and " + nA2 + " are removed from the<br/> equation"
+        hintText3 = "Based on the above hint , you need to substitute the value of x = " + root1 + " to get the<br/> value of " + co[0]
+        hintText4 = "Ensure that the denominator of the expression is <br/>factorized  and reduced  to factors of " \
                     "the lowest degree"
         hintText5 = " to get " + co[0] + "."
+        hintText13 = "Based on the above hint , you need to substitute the value of x = " + root1 + " to get the value of A . " \
+                     "Substitute the value of A in the equation and put x = 0 to get the value of C. " \
+                     "Now put the values of A and C in the equation to get the value of B"
+        hintText14 = "Based on the above hint , you need to substitute the value of x = " + root1 + " to get the value of A . " \
+                     "Substitute the value of A in the equation and put x = 0 to get the value of C."
+        hintText15 = "Substitute the value of x such that terms B and C are removed from the equation to get A. " \
+                     "Now use this value of A in the equation and substitute a new value of x to derive the value of C." \
+                     "Use the values of A and C in equation 1 to derive the value of B"
+        hintText16 = "Substitute the value of x such that terms B and C are removed from the equation to get A. " \
+                     "Now use this value of A in the equation and substitute a new value of x to derive the value of C."
         if ask > 2:
             root3 = ""
-            root2 = str(q['Denom'][rootIndex2])
+            root2 = MultiplyMinus(str(q['Denom'][rootIndex2]))
             if ask == 6:
-                root3 = str(q['Denom'][rootIndex3])
+                root3 = MultiplyMinus(str(q['Denom'][rootIndex3]))
             hintText6 = " Similarly substitute a different value of x to get the value of " + co[6]
             hintText7 = " Similarly substituting the value of x = " + root2 +" will get you the value of " + co[6]
-            hintText8 = "Substitute the value of x such that terms any two of the three terms of the equation shown " \
-                        "in the previous hint are removed to get one coefficient. Repeat this step with appropriate " \
-                        "values of x to find the coefficients of the other two terms as well"
-            hintText9 = "Substitute different values of x such that two of the terms are removed from the equation " \
+            hintText8 = "Substitute the value of x such that any two of the three terms of the<br/> equation shown " \
+                        "in the previous hint are removed to get one coefficient.<br/> Repeat this step with appropriate " \
+                        "values of x to find the coefficients<br/> of the other two terms as well"
+            hintText9 = "Substitute different values of x such that two of the terms are removed <br/>from the equation " \
                         "to get one of the co-efficients. Repeat the process to get the values of the other coefficients"
-            hintText10 = "Based on the above hint , you need to substitute the value of x = " + root1 + " to get the value of A ,"\
+            hintText10 = "Based on the above hint , you need to substitute the value of x = " + root1 + " <br/>to get the value of A ,"\
                          " x = " + root2 + " to get the value of B and x = " + root3 + " to get the value of C"
         if q['Dtype'] == 2 or q['Dtype'] == 3:
             hint1 = hintText4
             hint2 = hintText1
-            if ask == 3 or ask ==4 or ask == 5 or ask == 6:
+            if ask == 3 or ask == 4 or ask == 5 or ask == 6:
                 hint3 = hintText8
             else:
                 hint3 = hintText2
@@ -695,6 +733,31 @@ def generateCSV(ques):
             else:
                 hint2 = hintText9
                 hint3 = hintText10
+
+        if q['Mtype'] == 3:
+            if q['Dtype'] == 1:
+                if ask == 1:
+                    hint3 = hintText13
+                elif ask == 2:
+                    hint3 = hintText14
+                elif ask == 3 or ask == 4 or ask == 6:
+                    hint2 = hintText15
+                    hint3 = hintText13
+                elif ask == 5:
+                    hint2 = hintText16
+                    hint3 = hintText14
+
+
+        if q['Mtype'] == 2 and "B" in co:
+            root2 = MultiplyMinus(str(q['Denom'][rootIndex2]))
+            hintText11 = "Based on the above hint , you need to substitute the value of<br/> x = " + root1 + " to get the" \
+                         " value of A . Substitute the value of A in the<br/> equation and put x = " + root2 + " to get" \
+                         " the value of C.<br/>Now put the values of A and C in the equation to get the value of B "
+            hintText12 = "Substitute the value of x such that terms B and C are removed <br/>from the equation to get A." \
+                         " Now use this value of A in the<br/> equation and substitute a new value of x to derive the" \
+                         " value of C. <br/> Use the values of A and C in equation 1 to derive the value of B"
+            hint2 = hintText11
+            hint3 = hintText12
         data.append(
             [Question, 4, option1, option2, option3, option4, correct, hint1, hint2, hint3, topic, difficulty,
                 feedback[0], feedback[1], feedback[2], feedback[3]])
@@ -703,7 +766,7 @@ def generateCSV(ques):
     # data1 = data[0:18]
     # data2 = data[18:36]
     # data3 = data[36:]
-    with open('test.csv', 'wb') as fp:
+    with open('IQF_3.3.7.csv.backup', 'wb') as fp:
         a = csv.writer(fp, delimiter=',')
         a.writerows(data)
     print "Done", len(data)
@@ -714,6 +777,251 @@ def generateCSV(ques):
     # with open('Partial Fractions Complete - 3.2.csv', 'wb') as fp:
     #     a = csv.writer(fp, delimiter=',')
     #     a.writerows(data3)
+
+
+def generateCSV1(ques):
+    """
+
+    :param ques:
+    """
+    count = 0
+    data = []
+    for q in ques:
+        html = ""
+        numEq = ""
+        if q['Mtype'] == 4:
+            html += "<span style='float:left;'>The fraction </span><table style='float: left;position:relative;bottom: 31px;"\
+                    "margin-left: 15px; margin-right: 15px;'><tbody><tr style='text-align:center'><td><span>"
+
+            # html += "<span style='position:relative;float:left;top:12px'>If</span><span style='margin-left:50px;'>"\
+            #         "<span style='float: left;margin-left: 50px;margin-top: -18px;'><table><tbody><tr " \
+            #         "style='text-align:center'><td><span>"
+            if q['ans'] == 4:
+                numEq += "("
+                if q['Num'][0] != 0:
+                    numEq += GetCoeffString(q['Num'][0])
+                    numEq += "x<sup>3</sup>"
+                    if q['Num'][1] > 0:
+                        numEq += "+"
+                if q['Num'][1] != 0:
+                    numEq += GetCoeffString(q['Num'][1])
+                    numEq += "x<sup>2</sup>"
+                if q['Num'][2] > 0 and (q['Num'][0] != 0 or q['Num'][1] != 0):
+                    numEq += "+"
+                if q['Num'][2] != 0:
+                    numEq += GetCoeffString(q['Num'][2])
+                    numEq += "x"
+                if q['Num'][3] > 0 and (q['Num'][1] != 0 or q['Num'][2] != 0 or q['Num'][0] != 0):
+                    numEq += "+"
+                if q['Num'][3] != 0:
+                    numEq += str(q['Num'][3])
+                numEq += ")"
+                if q['Num'][4] == 0:
+                    numEq += "x"
+                else:
+                    numEq += "(x" + getSignedString(q['Num'][4]) + ")"
+            else:
+                if q['Num'][0] != 0:
+                    numEq += GetCoeffString(q['Num'][0])
+                    numEq += "x<sup>2</sup>"
+                    if q['Num'][1] > 0:
+                        numEq += "+"
+                if q['Num'][1] != 0:
+                    numEq += GetCoeffString(q['Num'][1])
+                    numEq += "x"
+                if q['Num'][2] > 0 and (q['Num'][0] != 0 or q['Num'][1] != 0):
+                    numEq += "+"
+                if q['Num'][2] != 0:
+                    numEq += str(q['Num'][2])
+
+            html += numEq
+            html += "</span></td></tr>"
+            html += "<tr><td style='padding:0px;height:1px;background:#8C9009;'></td></tr>"
+            html += "<tr style='text-align:center'><td>"
+            html += "<span>"
+
+                ## Denominator Type 1 and Main Type 1
+            if q['MtypeReal'] == 1:
+                html += "("
+                if q['Denom'][0] != 0:
+                    if q['Denom'][0] > 1:
+                        html = html + str(q['Denom'][0]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][1] > 0:
+                        html += "+"
+                if q['Denom'][1] != 0:
+                    html += str(q['Denom'][1])
+                html += ")"
+                html += "("
+                if q['Denom'][2] != 0:
+                    if q['Denom'][2] > 1:
+                        html = html + str(q['Denom'][2]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][3] > 0:
+                        html += "+"
+                if q['Denom'][3] != 0:
+                    html += str(q['Denom'][3])
+                html += ")"
+                html += "("
+                if q['Denom'][4] != 0:
+                    if q['Denom'][4] > 1:
+                        html = html + str(q['Denom'][4]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][5] > 0:
+                        html += "+"
+                if q['Denom'][5] != 0:
+                    html += str(q['Denom'][5])
+                html += ")"
+                html += "</span></span></td></tr></tbody></table></span>"
+                html += "<span> is </span>"
+
+                ## Denominator Type 2 and Main Type 2 or 3
+            if q['MtypeReal'] == 2 or q['MtypeReal'] == 3:
+                html += "("
+                if q['Denom'][0] != 0:
+                    if q['Denom'][0] > 1:
+                        html = html + str(q['Denom'][0]) + "x"
+                    else:
+                        html += "x"
+                    if q['Denom'][1] > 0:
+                        html += "+"
+                if q['Denom'][1] != 0:
+                    html += str(q['Denom'][1])
+                html += ")"
+
+                if q['MtypeReal'] == 3:
+                    local = "("
+                    if q['E'][0] != 0:
+                        local = local + GetCoeffString(q['E'][0])
+                        local += "x<sup>2</sup>"
+                        if q['E'][1] > 0:
+                            local += "+"
+                    if q['E'][1] != 0:
+                        local = local + GetCoeffString(q['E'][1])
+                        local += "x"
+                    if q['E'][2] > 0:
+                        local += "+"
+                    if q['E'][2] != 0:
+                        local += str(q['E'][2])
+                    local += ")"
+                    html += local
+
+                elif q['MtypeReal'] == 2:
+                    html += "("
+                    if q['Denom'][2] != 0:
+                        if q['Denom'][2] > 1:
+                            html = html + str(q['Denom'][2]) + "x"
+                        else:
+                            html += "x"
+                        if q['Denom'][3] > 0:
+                            html += "+"
+                    if q['Denom'][3] != 0:
+                        html += str(q['Denom'][3])
+                    html += ")"
+                    html += "<sup>2</sup>"
+
+                html += "</span></span></td></tr></tbody></table>"
+                html += "<span> is </span>"
+
+            Question = html
+            optionStr1 = "an Improper Fraction"
+            optionStr2 = "of the type : Distinct Linear Factors"
+            optionStr3 = "of the type : Repeated Linear Factors"
+            optionStr4 = "of the type : Irreducible Quadratic Factor"
+            option = [optionStr1, optionStr2, optionStr3, optionStr4]
+            option = random.sample(option, 4)
+            option1 = option[0]
+            option2 = option[1]
+            option3 = option[2]
+            option4 = option[3]
+            correct = 4
+            topic = 7
+            difficulty = q['MtypeReal']
+            if difficulty == 4:
+                difficulty = 3
+            feedback = []
+            index = 0
+            feedbackStr1 = "Your answer is correct! Let's try the next one"
+            feedbackStr2 = "Even though the denominator contains all linear factors, the fraction is called improper" \
+                           " when the degree of the numerator is either equal to or higher than the denominator . " \
+                           "Hence the answer is incorrect"
+            feedbackStr3 = "Your answer is incorrect. Please note that degree of the numerator is equal to or " \
+                           "greater than the degree of the denominator, thus making it an improper fraction"
+            feedbackStr4 = "The denominator term does not have distinct linear factors, hence your answer is incorrect"
+            feedbackStr5 = "The denominator term does not have repeated linear factors, hence your answer is incorrect"
+            feedbackStr6 = "The denominator term does not have an irreducible quadratic factor, hence your answer is " \
+                           "incorrect"
+            feedbackStr7 = "Even though the denominator contains repeated linear factors, the fraction is an improper" \
+                           " fraction when the degree of the numerator is either equal to or higher than the " \
+                           "denominator . Hence the answer is incorrect"
+            feedbackStr8 = "Even though the denominator contains an irreducible quadratic factor, the fraction is " \
+                           "said to be improper when  the degree of the numerator is either equal to or higher than " \
+                           "the denominator . Hence the answer is incorrect"
+            feedbackStr9 = "The degree of the numerator term is less than the denominator term thus making it a " \
+                           "proper fraction, hence your answer is incorrect"
+
+            for op in option:
+                index += 1
+                if op == optionStr1:
+                    if q['ans'] == 4:
+                        correct = index
+                        feedback.append(feedbackStr1)
+                    else:
+                        feedback.append(feedbackStr9)
+                elif op == optionStr2:
+                    if q['ans'] == 1:
+                        correct = index
+                        feedback.append(feedbackStr1)
+                    elif q['ans'] == 4:
+                        if q['MtypeReal'] == 1:
+                            feedback.append(feedbackStr2)
+                        else:
+                            feedback.append(feedbackStr3)
+                    else:
+                        feedback.append(feedbackStr4)
+                elif op == optionStr3:
+                    if q['ans'] == 2:
+                        correct = index
+                        feedback.append(feedbackStr1)
+                    elif q['ans'] == 4:
+                        if q['MtypeReal'] == 2:
+                            feedback.append(feedbackStr7)
+                        else:
+                            feedback.append(feedbackStr3)
+                    else:
+                        feedback.append(feedbackStr5)
+                elif op == optionStr4:
+                    if q['ans'] == 3:
+                        correct = index
+                        feedback.append(feedbackStr1)
+                    elif q['ans'] == 4:
+                        if q['MtypeReal'] == 3:
+                            feedback.append(feedbackStr8)
+                        else:
+                            feedback.append(feedbackStr3)
+                    else:
+                        feedback.append(feedbackStr6)
+
+        hint1 = "Check the degree of the term in the numerator and the denominator"
+        hint2 = "Check if there are common factors in the numerator and the denominator,<br/> If yes, remove them " \
+                "from both the numerator and the denominator"
+        hint3 = "Identify the type of factors in the denominator after reducing them to the<br/> lowest degree factors"
+
+        data.append(
+            [Question, 4, option1, option2, option3, option4, correct, hint1, hint2, hint3, topic, difficulty,
+                feedback[0], feedback[1], feedback[2], feedback[3]])
+        count += 1
+        print count
+        print option
+        print feedback
+        print q['ans']
+    with open('PIF_4.1.1.2.csv', 'wb') as fp:
+        a = csv.writer(fp, delimiter=',')
+        a.writerows(data)
+    print "Done", len(data)
 
 
 def generateImages(ques):

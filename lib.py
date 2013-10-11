@@ -6,7 +6,7 @@ import math
 
 
 # initiates the question generation steps and return a dictionary of questions, answers and other details
-def generateQuestions(Ntype=1, Dtype=1, Mtype=1):
+def generateQuestions(Mtype=1, Dtype=1, Ntype=1, count=0):
     """
 
     :param Ntype:
@@ -29,40 +29,83 @@ def generateQuestions(Ntype=1, Dtype=1, Mtype=1):
     D = setRandomDenom(Mtype)
     loop = True
 
-    while loop:
+    while loop and Mtype != 4:
         K = setRandomNum(Ntype)
         D = setRandomDenom(Mtype)
-        if Mtype == 2:
-            if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
-                    (D[3] == D[1] and D[3] == 0):
-                continue
-                # D = setRandomDenom(Mtype)
-        if Mtype == 1:
-                if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
-                        (D[3] == D[1] and D[3] == 0) or (D[1] == D[3] or D[3] == D[5] or D[5] == D[1]):
-                    continue
-                    # D = setRandomDenom(Mtype)
-        elif Mtype == 3:
-            Quad = [D[2], D[3], D[4]]
-            if checkRootType(Quad):
-                continue
-                # D = setRandomDenom(Mtype)
-                # Quad = [D[2], D[3], D[4]]
-                # print Quad,checkRootType(Quad)
-            # print D,Mtype
-        if (K[0] == K[1] and K[1] == K[2]) or checkCommonFactor(K,D,["eq", "fac"]):
-            print checkCommonFactor(K,D,["eq","fac"]), K,D
-            continue
-            # K = setRandomNum(Ntype)
-        loop = False
+        loop = checkNumDenomCondition(Mtype, D, K, True)
+
+    if Mtype == 4:
+        if count == 1 or count == 2:
+            Mtype1 = 4
+            Mtype2 = 1
+        elif count == 3 or count == 4:
+            Mtype1 = 4
+            Mtype2 = 2
+        elif count == 5 or count == 6:
+            Mtype1 = 4
+            Mtype2 = 3
+        elif count == 7 or count == 8 or count == 9:
+            Mtype1 = 1
+            Mtype2 = 1
+        elif count == 10 or count == 11 or count == 12:
+            Mtype1 = 2
+            Mtype2 = 2
+        elif count == 13 or count == 14 or count == 15:
+            Mtype1 = 3
+            Mtype2 = 3
+        loop = True
+        if Mtype1 == 4:
+            checkNum = False
+        else:
+            checkNum = True
+        while loop:
+            K = setRandomNum(Ntype, Mtype1)
+            D = setRandomDenom(Mtype2)
+            loop = checkNumDenomCondition(Mtype2, D, K, checkNum)
+            E = []
+            if Mtype2 == 3:
+                E = [D[2], D[3], D[4]]
+        Ques = {'Num': K, 'Denom': D, 'MtypeReal': Mtype2, 'Mtype': Mtype, 'ans': Mtype1, 'E': E}
+        return Ques
 
     Ques = solvePartialFraction(D, K, Dtype, Mtype)
     return Ques
 
 
+## check conditions for denominator and numerator. If checkNum is False it will not check conditions for Numerator
+def checkNumDenomCondition(Mtype, D, K, checkNum):
+    if Mtype == 2:
+        if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
+                (D[3] == D[1] and D[3] == 0):
+            return True
+            # D = setRandomDenom(Mtype)
+        DEq = D
+    elif Mtype == 1:
+        if (D[1] == D[3] and D[3] == D[5]) or (D[2] == D[1] and D[1] == 0) or (D[2] == D[3] and D[2] == 0) or\
+                (D[3] == D[1] and D[3] == 0) or (D[1] == D[3] or D[3] == D[5] or D[5] == D[1]):
+            return True
+            # D = setRandomDenom(Mtype)
+        DEq = D
+
+    elif Mtype == 3:
+        Quad = [D[2], D[3], D[4]]
+        if checkRootType(Quad):
+            return True
+            # D = setRandomDenom(Mtype)
+            # Quad = [D[2], D[3], D[4]]
+            # print Quad,checkRootType(Quad)
+        # print D,Mtype
+        DEq = [D[0], D[1], 0, 1, 0, 1]
+    if checkNum:
+        if (K[0] == K[1] and K[1] == K[2]) or checkCommonFactor(K, DEq, ["eq", "fac"]):
+                print checkCommonFactor(K, DEq, ["eq", "fac"]), K, DEq
+                return True
+
+    return False
+
+
 # solves partial fraction and return a dictionary containing question and answers
 # Arguments: Denominator, Numerator, Num Type, Denom Type and Main Type
-
 def solvePartialFraction(D, K, Dtype=0, Mtype=0):
     Ques = {}
     rhsA = 0
@@ -173,24 +216,34 @@ def setRandomDenom(Mtype=0):
     return D
 
 
-# Returns a rlist of random number as a quadratic ax2+bx+c depending on Numerator Type
-def setRandomNum(types):
+# Returns a list of random number as a quadratic ax2+bx+c depending on Numerator Type
+def setRandomNum(types, Mtype=0):
+    """
+
+    :param types:
+    :param Mtype:
+    :return:
+    """
     K = [random.randint(-12, 12), random.randint(-12, 12), random.randint(-12, 12)]
-    if types == 1:
-        K[0] = 0
-    if types == 2:
-        K[1] = 0
-    if types == 4:
-        K[0] = 0
-        K[1] = 0
-    if types == 5:
-        K[2] = 0
-    if types == 6:
-        K[1] = 0
-        K[2] = 0
-    if types == 7:
-        K[0] = 0
-        K[2] = 0
+    if Mtype != 4:
+        if types == 1:
+            K[0] = 0
+        if types == 2:
+            K[1] = 0
+        if types == 4:
+            K[0] = 0
+            K[1] = 0
+        if types == 5:
+            K[2] = 0
+        if types == 6:
+            K[1] = 0
+            K[2] = 0
+        if types == 7:
+            K[0] = 0
+            K[2] = 0
+    else:
+        K.append(random.randint(-12, 12))
+        K.append(random.randint(-12, 12))
 
     return K
 
@@ -447,12 +500,28 @@ def checkRootType(Quad):
 # Returns RHS equation after eliminating denominators from both side.. i.e. lhs = A(quad) + B(quad) + c(quad)
 def getRHS(q):
     rhs = ""
-    if q['Dtype'] == 1 or q['Dtype'] == 2 or q['Dtype'] == 3:
+    if q['Mtype'] != 3:
         rhs = "A(x" + getSignedString(q['Denom'][3]) + ")(x" + getSignedString(q['Denom'][5]) + ") + B(x" + \
               getSignedString(q['Denom'][1]) + ")(x" + getSignedString(q['Denom'][5]) + ") + C(x" + \
               getSignedString(q['Denom'][1]) + ")"
         if q['Mtype'] == 1:
             rhs += "(x" + getSignedString(q['Denom'][3]) + ")"
+    else:
+        local = "("
+        if q['E'][0] != 0:
+            local += GetCoeffString(q['E'][0])
+            local += "x<sup>2</sup>"
+            if q['E'][1] > 0:
+                local += "+"
+        if q['E'][1] != 0:
+            local += GetCoeffString(q['E'][1])
+            local += "x"
+        if q['E'][2] > 0:
+            local += "+"
+        if q['E'][2] != 0:
+            local += str(q['E'][2])
+        local += ")"
+        rhs = "A" + local + " + Bx(x" + getSignedString(q['Denom'][1]) + ") + C(x" + getSignedString(q['Denom'][1]) + ")"
     return rhs
 
 
